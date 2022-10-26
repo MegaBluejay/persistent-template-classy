@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.35.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9530d91ec1ba694ed49be0da24eba33680900e20636130fa90bace81d6b05979
+-- hash: 919a70b7c429fd48f121beff973df86ab27e760647dad5dc1a00952f761420b6
 
 name:           persistent-template-classy
-version:        0.2.0
+version:        0.2.1
 synopsis:       Generate classy lens field accessors for persistent models
 description:    Generate classy lens field accessors for persistent models.
 category:       Database, Lens, Yesod
