@@ -1,15 +1,16 @@
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE ImportQualifiedPost #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Database.Persist.TH.Classy where
 
 import Control.Lens (Lens')
-import qualified Data.Char as Char
-import qualified Data.Text as T
+import Data.Char qualified as Char
+import Data.Text qualified as T
 import Data.Traversable (forM)
 import Database.Persist
 import Language.Haskell.TH.Lib
@@ -21,16 +22,16 @@ import Language.Haskell.TH.Syntax
 --     class HasName ev a | ev -> a where
 --       name :: Lens' ev a
 mkClassyClass ::
-     String -- ^ like "name"
-  -> Q [Dec]
-mkClassyClass name
-      -- | like "Name"
- =
+  -- | like "name"
+  String ->
+  Q [Dec]
+mkClassyClass name =
+  -- \| like "Name"
   let nameCapitalized =
         case name of
           "" -> ""
-          (x:xs) -> Char.toUpper x : xs
-      -- | like "HasName"
+          (x : xs) -> Char.toUpper x : xs
+      -- \| like "HasName"
       hasName = "Has" <> nameCapitalized
    in return
         [ ClassD
@@ -40,9 +41,10 @@ mkClassyClass name
             [FunDep [mkName "ev"] [mkName "a"]]
             [ SigD
                 (mkName name)
-                (AppT
-                   (AppT (ConT (mkName "Lens'")) (VarT (mkName "ev")))
-                   (VarT (mkName "a")))
+                ( AppT
+                    (AppT (ConT (mkName "Lens'")) (VarT (mkName "ev")))
+                    (VarT (mkName "a"))
+                )
             ]
         ]
 
@@ -60,35 +62,39 @@ mkClassyInstance EntityDef {..} = do
     case fieldType of
       FTTypeCon tmodule tname -> do
         let _unused = ()
-              -- | like "Person"
+            -- \| like "Person"
             instanceTypeName =
               ConT (mkName (T.unpack (unHaskellName entityHaskell)))
-              -- | like "person"
+            -- \| like "person"
             instanceTypeNameLowerFirstChar =
               case T.unpack (unHaskellName entityHaskell) of
                 "" -> ""
-                (x:xs) -> Char.toLower x : xs
-              -- | like "Name"
+                (x : xs) -> Char.toLower x : xs
+            -- \| like "Name"
             fieldUpperFirstChar =
               case T.unpack (unHaskellName fieldHaskell) of
                 "" -> ""
-                (x:xs) -> Char.toUpper x : xs
-              -- | like "HasName"
+                (x : xs) -> Char.toUpper x : xs
+            -- \| like "HasName"
             instanceHasName = mkName ("Has" <> fieldUpperFirstChar)
-              -- | like "personName"
+            -- \| like "personName"
             fieldLongName =
               mkName (instanceTypeNameLowerFirstChar ++ fieldUpperFirstChar)
             fieldClause =
               Clause
                 []
-                (NormalB
-                   (AppE
-                      (AppE (VarE (mkName "lens")) (VarE fieldLongName))
-                      (LamE
-                         [VarP (mkName "x"), VarP (mkName "y")]
-                         (RecUpdE
-                            (VarE (mkName "x"))
-                            [(fieldLongName, VarE (mkName "y"))]))))
+                ( NormalB
+                    ( AppE
+                        (AppE (VarE (mkName "lens")) (VarE fieldLongName))
+                        ( LamE
+                            [VarP (mkName "x"), VarP (mkName "y")]
+                            ( RecUpdE
+                                (VarE (mkName "x"))
+                                [(fieldLongName, VarE (mkName "y"))]
+                            )
+                        )
+                    )
+                )
                 []
             field =
               FunD
